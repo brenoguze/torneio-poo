@@ -1,5 +1,7 @@
 package combate;
 
+import java.util.Random;
+
 public abstract class Combatente {
 
     protected String nome;
@@ -30,5 +32,9 @@ public abstract class Combatente {
 
     public void receberDano(int dano) {
         pv = Math.max(0, pv - dano);
+    }
+
+    public int defender(int danoBruto, Random rnd) {
+        return danoBruto;
     }
 }

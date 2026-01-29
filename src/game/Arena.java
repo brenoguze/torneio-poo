@@ -30,11 +30,7 @@ public class Arena {
         }
 
         System.out.println("\n=== FIM DA BATALHA ===");
-        if (temVivos(timeA)) {
-            System.out.println("VENCEDOR: Time A");
-        } else {
-            System.out.println("VENCEDOR: Time B");
-        }
+        System.out.println(temVivos(timeA) ? "VENCEDOR: Time A" : "VENCEDOR: Time B");
     }
 
     private void turno(List<Combatente> atacantes, List<Combatente> defensores, String nomeTime) {
@@ -46,27 +42,36 @@ public class Arena {
             Combatente alvo = escolherAlvo(defensores);
             if (alvo == null) return;
 
-            int dano = atacar(atacante);
-            alvo.receberDano(dano);
+            int danoBruto = atacar(atacante);
+            int danoFinal = alvo.defender(danoBruto, rnd);
+            int defesa = danoBruto - danoFinal;
+
+            alvo.receberDano(danoFinal);
+
+            String infoDefesa = "";
+            if (alvo instanceof Guardiao g) {
+                if (!g.getUltimoEvento().isEmpty()) {
+                    infoDefesa = " (" + g.getUltimoEvento() + ")";
+                    if ("BLOQUEIO".equals(g.getUltimoEvento())) {
+                        infoDefesa += " Vigor: " + g.getVigorAntes() + " -> " + g.getVigorDepois();
+                    }
+                }
+            }
 
             System.out.println(
-                atacante.getNome() + " atacou " +
-                alvo.getNome() + " causando " + dano +
-                " (PV alvo: " + alvo.getPv() + ")"
+                atacante.getNome() + " atacou " + alvo.getNome() +
+                " | Dano bruto: " + danoBruto +
+                " | Defesa: " + defesa + infoDefesa +
+                " | Dano final: " + danoFinal +
+                " | PV alvo: " + alvo.getPv()
             );
         }
     }
 
     private int atacar(Combatente c) {
-        if (c instanceof Guardiao g) {
-            return g.atacar(rnd);
-        }
-        if (c instanceof Arcanista a) {
-            return a.atacar(rnd);
-        }
-        if (c instanceof Cacador ca) {
-            return ca.atacar(rnd);
-        }
+        if (c instanceof Guardiao g) return g.atacar(rnd);
+        if (c instanceof Arcanista a) return a.atacar(rnd);
+        if (c instanceof Cacador ca) return ca.atacar(rnd);
         return 0;
     }
 
