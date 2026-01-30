@@ -43,10 +43,19 @@ public class Arena {
             if (alvo == null) return;
 
             int danoBruto = atacar(atacante);
+
             int danoFinal = alvo.defender(danoBruto, rnd);
             int defesa = danoBruto - danoFinal;
 
             alvo.receberDano(danoFinal);
+
+            String infoAtaque = "";
+            if (atacante instanceof Arcanista a) {
+                if (!a.getUltimoTipoAtaque().isEmpty()) {
+                    infoAtaque = " (" + a.getUltimoTipoAtaque() + ") Mana: " +
+                            a.getManaAntes() + " -> " + a.getManaDepois();
+                }
+            }
 
             String infoDefesa = "";
             if (alvo instanceof Guardiao g) {
@@ -54,12 +63,17 @@ public class Arena {
                     infoDefesa = " (" + g.getUltimoEvento() + ")";
                     if ("BLOQUEIO".equals(g.getUltimoEvento())) {
                         infoDefesa += " Vigor: " + g.getVigorAntes() + " -> " + g.getVigorDepois();
+                    } else {
+                        infoDefesa += " Vigor: " + g.getVigor();
                     }
+                } else {
+                    infoDefesa = " Vigor: " + g.getVigor();
                 }
             }
 
             System.out.println(
-                atacante.getNome() + " atacou " + alvo.getNome() +
+                atacante.getNome() + infoAtaque +
+                " atacou " + alvo.getNome() +
                 " | Dano bruto: " + danoBruto +
                 " | Defesa: " + defesa + infoDefesa +
                 " | Dano final: " + danoFinal +
