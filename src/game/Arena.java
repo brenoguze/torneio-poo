@@ -50,10 +50,15 @@ public class Arena {
             alvo.receberDano(danoFinal);
 
             String infoAtaque = "";
+
             if (atacante instanceof Arcanista a) {
                 if (!a.getUltimoTipoAtaque().isEmpty()) {
                     infoAtaque = " (" + a.getUltimoTipoAtaque() + ") Mana: " +
                             a.getManaAntes() + " -> " + a.getManaDepois();
+                }
+            } else if (atacante instanceof Cacador c) {
+                if (c.foiUltimoCritico()) {
+                    infoAtaque = " (CRÍTICO)";
                 }
             }
 
@@ -72,12 +77,12 @@ public class Arena {
             }
 
             System.out.println(
-                atacante.getNome() + infoAtaque +
-                " atacou " + alvo.getNome() +
-                " | Dano bruto: " + danoBruto +
-                " | Defesa: " + defesa + infoDefesa +
-                " | Dano final: " + danoFinal +
-                " | PV alvo: " + alvo.getPv()
+                    atacante.getNome() + infoAtaque +
+                            " atacou " + alvo.getNome() +
+                            " | Dano bruto: " + danoBruto +
+                            " | Defesa: " + defesa + infoDefesa +
+                            " | Dano final: " + danoFinal +
+                            " | PV alvo: " + alvo.getPv()
             );
         }
     }
