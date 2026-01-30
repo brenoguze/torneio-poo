@@ -2,14 +2,15 @@ package game;
 
 import combate.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 public class Arena {
 
-    private List<Combatente> timeA;
-    private List<Combatente> timeB;
-    private Random rnd = new Random();
+    private final List<Combatente> timeA;
+    private final List<Combatente> timeB;
+    private final Random rnd = new Random();
 
     public Arena(List<Combatente> timeA, List<Combatente> timeB) {
         this.timeA = timeA;
@@ -17,15 +18,30 @@ public class Arena {
     }
 
     public void iniciar() {
+        String primeiro = rnd.nextBoolean() ? "A" : "B";
+
+        System.out.println("\nSorteando quem começa...");
+        System.out.println("Resultado: TIME " + primeiro + " começa!");
+
         int rodada = 1;
 
         while (temVivos(timeA) && temVivos(timeB)) {
-            System.out.println("\n=== RODADA " + rodada + " ===");
+            System.out.println("\n==================================");
+            System.out.println("RODADA " + rodada);
+            System.out.println("==================================");
 
-            turno(timeA, timeB, "A");
-            if (!temVivos(timeB)) break;
+            if (primeiro.equals("A")) {
+                turno(timeA, timeB, "A");
+                if (!temVivos(timeB)) break;
 
-            turno(timeB, timeA, "B");
+                turno(timeB, timeA, "B");
+            } else {
+                turno(timeB, timeA, "B");
+                if (!temVivos(timeA)) break;
+
+                turno(timeA, timeB, "A");
+            }
+
             rodada++;
         }
 
@@ -34,12 +50,12 @@ public class Arena {
     }
 
     private void turno(List<Combatente> atacantes, List<Combatente> defensores, String nomeTime) {
-        System.out.println("Vez do Time " + nomeTime);
+        System.out.println("\n---- VEZ DO TIME " + nomeTime + " ----");
 
         for (Combatente atacante : atacantes) {
             if (!atacante.estaVivo()) continue;
 
-            Combatente alvo = escolherAlvo(defensores);
+            Combatente alvo = escolherAlvoAleatorio(defensores);
             if (alvo == null) return;
 
             int danoBruto = atacar(atacante);
@@ -47,14 +63,14 @@ public class Arena {
             int danoFinal = alvo.defender(danoBruto, rnd);
             int defesa = danoBruto - danoFinal;
 
+            int pvAntes = alvo.getPv();
             alvo.receberDano(danoFinal);
 
             String infoAtaque = "";
-
             if (atacante instanceof Arcanista a) {
                 if (!a.getUltimoTipoAtaque().isEmpty()) {
-                    infoAtaque = " (" + a.getUltimoTipoAtaque() + ") Mana: " +
-                            a.getManaAntes() + " -> " + a.getManaDepois();
+                    infoAtaque = " (" + a.getUltimoTipoAtaque() + ") Mana: "
+                            + a.getManaAntes() + " -> " + a.getManaDepois();
                 }
             } else if (atacante instanceof Cacador c) {
                 if (c.foiUltimoCritico()) {
@@ -82,8 +98,12 @@ public class Arena {
                             " | Dano bruto: " + danoBruto +
                             " | Defesa: " + defesa + infoDefesa +
                             " | Dano final: " + danoFinal +
-                            " | PV alvo: " + alvo.getPv()
+                            " | PV " + alvo.getNome() + ": " + pvAntes + " -> " + alvo.getPv()
             );
+
+            if (pvAntes > 0 && !alvo.estaVivo()) {
+                System.out.println(">>> " + alvo.getNome() + " foi derrotado(a)!");
+            }
         }
     }
 
@@ -94,11 +114,19 @@ public class Arena {
         return 0;
     }
 
-    private Combatente escolherAlvo(List<Combatente> time) {
-        return time.stream().filter(Combatente::estaVivo).findAny().orElse(null);
+    private Combatente escolherAlvoAleatorio(List<Combatente> time) {
+        List<Combatente> vivos = new ArrayList<>();
+        for (Combatente c : time) {
+            if (c.estaVivo()) vivos.add(c);
+        }
+        if (vivos.isEmpty()) return null;
+        return vivos.get(rnd.nextInt(vivos.size()));
     }
 
     private boolean temVivos(List<Combatente> time) {
-        return time.stream().anyMatch(Combatente::estaVivo);
+        for (Combatente c : time) {
+            if (c.estaVivo()) return true;
+        }
+        return false;
     }
 }
