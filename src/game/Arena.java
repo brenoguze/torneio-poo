@@ -5,12 +5,14 @@ import combate.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Scanner;
 
 public class Arena {
 
     private final List<Combatente> timeA;
     private final List<Combatente> timeB;
     private final Random rnd = new Random();
+    private final Scanner sc = new Scanner(System.in);
 
     public Arena(List<Combatente> timeA, List<Combatente> timeB) {
         this.timeA = timeA;
@@ -31,14 +33,18 @@ public class Arena {
             System.out.println("==================================");
 
             if (primeiro.equals("A")) {
+                esperarAtaque("A");
                 turno(timeA, timeB, "A");
                 if (!temVivos(timeB)) break;
 
+                esperarAtaque("B");
                 turno(timeB, timeA, "B");
             } else {
+                esperarAtaque("B");
                 turno(timeB, timeA, "B");
                 if (!temVivos(timeA)) break;
 
+                esperarAtaque("A");
                 turno(timeA, timeB, "A");
             }
 
@@ -50,8 +56,18 @@ public class Arena {
         System.out.println(temVivos(timeA) ? "VENCEDOR: Time A" : "VENCEDOR: Time B");
     }
 
+    private void esperarAtaque(String time) {
+        System.out.println("\n---- VEZ DO TIME " + time + " ----");
+        System.out.print("Digite 1 para atacar: ");
+
+        while (true) {
+            String entrada = sc.nextLine().trim();
+            if (entrada.equals("1")) break;
+            System.out.print("Entrada inválida. Digite 1 para atacar: ");
+        }
+    }
+
     private void turno(List<Combatente> atacantes, List<Combatente> defensores, String nomeTime) {
-        System.out.println("\n---- VEZ DO TIME " + nomeTime + " ----");
 
         for (Combatente atacante : atacantes) {
             if (!atacante.estaVivo()) continue;
@@ -68,14 +84,10 @@ public class Arena {
 
             String infoAtaque = "";
             if (atacante instanceof Arcanista a) {
-                if (!a.getUltimoTipoAtaque().isEmpty()) {
-                    infoAtaque = " (" + a.getUltimoTipoAtaque() + ") Mana: "
-                            + a.getManaAntes() + " -> " + a.getManaDepois();
-                }
-            } else if (atacante instanceof Cacador c) {
-                if (c.foiUltimoCritico()) {
-                    infoAtaque = " (CRÍTICO)";
-                }
+                infoAtaque = " (" + a.getUltimoTipoAtaque() + ") Mana: "
+                        + a.getManaAntes() + " -> " + a.getManaDepois();
+            } else if (atacante instanceof Cacador c && c.foiUltimoCritico()) {
+                infoAtaque = " (CRÍTICO)";
             }
 
             String infoDefesa = "";
@@ -87,8 +99,6 @@ public class Arena {
                     } else {
                         infoDefesa += " Vigor: " + g.getVigor();
                     }
-                } else {
-                    infoDefesa = " Vigor: " + g.getVigor();
                 }
             }
 
@@ -140,7 +150,6 @@ public class Arena {
         for (Combatente c : timeB) {
             System.out.println(formatarStatus(c));
         }
-        System.out.println();
     }
 
     private String formatarStatus(Combatente c) {
