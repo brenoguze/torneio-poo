@@ -42,6 +42,7 @@ public class Arena {
                 turno(timeA, timeB, "A");
             }
 
+            imprimirStatus();
             rodada++;
         }
 
@@ -59,7 +60,6 @@ public class Arena {
             if (alvo == null) return;
 
             int danoBruto = atacar(atacante);
-
             int danoFinal = alvo.defender(danoBruto, rnd);
             int defesa = danoBruto - danoFinal;
 
@@ -128,5 +128,34 @@ public class Arena {
             if (c.estaVivo()) return true;
         }
         return false;
+    }
+
+    private void imprimirStatus() {
+        System.out.println("\n-- STATUS TIME A --");
+        for (Combatente c : timeA) {
+            System.out.println(formatarStatus(c));
+        }
+
+        System.out.println("\n-- STATUS TIME B --");
+        for (Combatente c : timeB) {
+            System.out.println(formatarStatus(c));
+        }
+        System.out.println();
+    }
+
+    private String formatarStatus(Combatente c) {
+        String base = c.getNome() + " | PV: " + c.getPv();
+
+        if (c instanceof Guardiao g) {
+            base += " | Vigor: " + g.getVigor();
+        } else if (c instanceof Arcanista a) {
+            base += " | Mana: " + a.getMana() + "/" + a.getManaMax();
+        }
+
+        if (!c.estaVivo()) {
+            base += " (DERROTADO)";
+        }
+
+        return base;
     }
 }
